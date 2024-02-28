@@ -10,6 +10,10 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.get('/', async (req, res) => {
+  res.send('hello, i am start page');
+});
+
 app.post('/submit', async (req, res) => {
   try {
     const formData = req.body;
@@ -38,7 +42,7 @@ app.post('/submit', async (req, res) => {
       );
       throw new Error('Error sending data to Telegram');
     }
-
+    console.log('start');
     res.status(200).send('Form data submitted successfully.');
   } catch (error) {
     console.error('Error:', error);
