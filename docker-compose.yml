@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  telegram_sender_server:
+    container_name: 'sender_server'
+    build: .
+    ports:
+      - '3000:3000'
