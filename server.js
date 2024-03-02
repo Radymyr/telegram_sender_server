@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 var bodyParser = require('body-parser');
+import { inject } from '@vercel/analytics';
+inject();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
