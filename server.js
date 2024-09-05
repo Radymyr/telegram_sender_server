@@ -19,8 +19,8 @@ app.post('/submit', async (req, res) => {
     const formData = req.body;
     const telegramToken = process.env.TELEGRAM_TOKEN;
     const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-    const id = chatId;
     const { name, phone, message, chatId } = formData;
+    const id = chatId;
 
     const response = await fetch(telegramApiUrl, {
       method: 'POST',
