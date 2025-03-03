@@ -1,5 +1,3 @@
-import {verifyRecaptcha} from "./utils";
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -22,11 +20,7 @@ const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage
 app.post('/submit', async (req, res) => {
 
   try {
-    const { name, phone, message, chatId, recaptchaToken } = req.body;
-
-    if (!await verifyRecaptcha(recaptchaToken)) {
-      return res.status(403).send('Подозрительная активность');
-    }
+    const { name, phone, message, chatId } = req.body;
 
     const response = await fetch(telegramApiUrl, {
       method: 'POST',
