@@ -20,10 +20,6 @@ const telegramToken = process.env.TELEGRAM_TOKEN;
 const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
 
 app.post('/submit', async (req, res) => {
-  const allowedOrigin = 'https://ubiquitous-octo-engine-aqk9.vercel.app';
-  if (req.headers.origin !== allowedOrigin) {
-    return res.status(403).send('Запрос заблокирован');
-  }
 
   try {
     const { name, phone, message, chatId, recaptchaToken } = req.body;
