@@ -1,7 +1,9 @@
+import {verifyRecaptcha} from "./utils";
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-var bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,13 +16,21 @@ app.get('/', async (req, res) => {
   res.send('hello, i am start page');
 });
 
+const telegramToken = process.env.TELEGRAM_TOKEN;
+const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+
 app.post('/submit', async (req, res) => {
+  const allowedOrigin = 'https://ubiquitous-octo-engine-aqk9.vercel.app';
+  if (req.headers.origin !== allowedOrigin) {
+    return res.status(403).send('Запрос заблокирован');
+  }
+
   try {
-    const formData = req.body;
-    const telegramToken = process.env.TELEGRAM_TOKEN;
-    const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
-    const { name, phone, message, chatId } = formData;
-    const id = chatId;
+    const { name, phone, message, chatId, recaptchaToken } = req.body;
+
+    if (!await verifyRecaptcha(recaptchaToken)) {
+      return res.status(403).send('Подозрительная активность');
+    }
 
     const response = await fetch(telegramApiUrl, {
       method: 'POST',
@@ -28,7 +38,7 @@ app.post('/submit', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        chat_id: id,
+        chat_id: chatId,
         text: `Имя: ${name}\nТелефон: ${phone}\nСообщение: ${message}`,
       }),
     });
