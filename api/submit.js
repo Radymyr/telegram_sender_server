@@ -11,7 +11,6 @@ const BLOCK_TIME = getLimitTime(1);
 const telegramToken = process.env.TELEGRAM_TOKEN;
 const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
 
-// const url = 'http://localhost:3000'
 const url = 'https://telegram-sender-server.vercel.app'
 const route = '/success';
 

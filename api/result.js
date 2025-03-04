@@ -3,6 +3,7 @@ import Redis from "ioredis";
 const fs = require('fs').promises;
 import {getUserKey} from "../utils/redis";
 import {runCors} from "../utils/runCors";
+import * as path from "node:path";
 
 const redis = new Redis(process.env.REDIS_URL);
 
