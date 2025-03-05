@@ -73,7 +73,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       message: 'Форму успішно відправлено!',
-      redirectUrl: `${url}${route}?name=${encodeURIComponent(name)}`,
+      redirectUrl: `${url}${route}?name=${encodeURIComponent(name)}&token=${sessionToken}`,
       sessionToken: sessionToken // Отправляем токен клиенту
     });
   } catch (error) {

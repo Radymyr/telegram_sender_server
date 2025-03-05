@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     }
 
     const userKey = getUserKey(req);
-    const sessionToken = req.headers['x-session-token'];
+    const sessionToken = req.query.token; // Берем токен из URL
     if (!sessionToken) {
       return res.status(403).send('Токен сесії відсутній');
     }
