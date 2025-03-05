@@ -1,3 +1,4 @@
 export function getUserKey(req) {
-    return (req.headers["x-forwarded-for"] || req.socket.remoteAddress) + req.headers["user-agent"];
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    return `${ip}`;
 }

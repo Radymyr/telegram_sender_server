@@ -28,9 +28,8 @@ export default async function handler(req, res) {
       return res.status(405).send("метод не дозволено");
     }
 
-    const userKey = getUserKey(req); // IP для базовой идентификации
-    const sessionToken = req.headers['x-session-token'] || crypto.randomBytes(16).toString('hex'); // Токен из заголовка или новый
-    const submitKey = `submit:${userKey}:${sessionToken}`; // Уникальный ключ для сессии
+    const userKey = getUserKey(req);
+    const submitKey = `submit:${userKey}`; // Только IP для ограничения отправки
 
     const submitExists = await redis.get(submitKey);
     if (submitExists) {
@@ -41,7 +40,8 @@ export default async function handler(req, res) {
       });
     }
 
-    const {name, phone, message, chatId} = req.body;
+    const sessionToken = crypto.randomBytes(16).toString('hex'); // Уникальный токен для доступа
+    const { name, phone, message, chatId } = req.body;
 
     const response = await fetch(telegramApiUrl, {
       method: 'POST',
@@ -56,25 +56,21 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const responseBody = await response.text();
-      console.error(
-        'Error response from Telegram API:',
-        response.status,
-        responseBody
-      );
-      throw new Error('помилка відправлення даних у тг');
+      console.error('Error response from Telegram API:', response.status, responseBody);
+      throw new Error('Помилка відправлення даних у Telegram');
     }
 
-    // Записываем ключ для ограничения отправки
+    // Записываем ключ для ограничения отправки (только IP)
     await redis.set(submitKey, 'blocked', 'EX', BLOCK_TIME);
 
-    // Записываем ключ для доступа к /success
+    // Записываем ключ для доступа к /success (IP + токен)
     const resultKey = `result:${userKey}:${sessionToken}`;
     await redis.set(resultKey, 'allowed', 'EX', BLOCK_TIME);
 
     res.status(200).json({
       message: 'Форму успішно відправлено!',
       redirectUrl: `${url}${route}?name=${encodeURIComponent(name)}&token=${sessionToken}`,
-      sessionToken: sessionToken // Отправляем токен клиенту
+      sessionToken: sessionToken
     });
   } catch (error) {
     console.error('Error:', error);
