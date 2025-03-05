@@ -27,10 +27,12 @@ export default async function handler(req, res) {
       return res.status(405).send("метод не дозволено");
     }
 
-    const submitKey = `submit:${getUserKey(req)}`; // Ключ для ограничения отправки
-    const existingKey = await redis.get(submitKey);
+    const userKey = getUserKey(req); // IP для базовой идентификации
+    const sessionToken = req.headers['x-session-token'] || crypto.randomBytes(16).toString('hex'); // Токен из заголовка или новый
+    const submitKey = `submit:${userKey}:${sessionToken}`; // Уникальный ключ для сессии
 
-    if (existingKey) {
+    const submitExists = await redis.get(submitKey);
+    if (submitExists) {
       const ttl = await redis.ttl(submitKey);
       const minutesLeft = Math.ceil(ttl / 60);
       return res.status(429).json({
@@ -64,13 +66,14 @@ export default async function handler(req, res) {
     // Записываем ключ для ограничения отправки
     await redis.set(submitKey, 'blocked', 'EX', BLOCK_TIME);
 
-    // Записываем отдельный ключ для доступа к /success
-    const resultKey = `result:${getUserKey(req)}`;
+    // Записываем ключ для доступа к /success
+    const resultKey = `result:${userKey}:${sessionToken}`;
     await redis.set(resultKey, 'allowed', 'EX', BLOCK_TIME);
 
     res.status(200).json({
       message: 'Форму успішно відправлено!',
-      redirectUrl: `${url}${route}?name=${encodeURIComponent(name)}`
+      redirectUrl: `${url}${route}?name=${encodeURIComponent(name)}`,
+      sessionToken: sessionToken // Отправляем токен клиенту
     });
   } catch (error) {
     console.error('Error:', error);

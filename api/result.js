@@ -15,8 +15,13 @@ export default async function handler(req, res) {
       return res.status(405).send("метод не дозволено");
     }
 
-    const resultKey = `result:${getUserKey(req)}`; // Отдельный ключ для доступа
+    const userKey = getUserKey(req);
+    const sessionToken = req.headers['x-session-token'];
+    if (!sessionToken) {
+      return res.status(403).send('Токен сесії відсутній');
+    }
 
+    const resultKey = `result:${userKey}:${sessionToken}`;
     if (!await redis.get(resultKey)) {
       return res.status(403).send('Доступ заборонено');
     }
@@ -24,7 +29,6 @@ export default async function handler(req, res) {
     await redis.del(resultKey);
 
     const filePath = path.join(process.cwd(), 'private', 'result.html');
-    console.log('Attempting to read file:', filePath);
     const fileContent = await fs.readFile(filePath, 'utf8');
     res.status(200).setHeader('Content-Type', 'text/html').send(fileContent);
   } catch (error) {
