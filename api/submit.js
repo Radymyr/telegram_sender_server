@@ -72,6 +72,7 @@ export default async function handler(req, res) {
       redirectUrl: `${url}${route}?name=${encodeURIComponent(name)}&token=${sessionToken}`,
       sessionToken: sessionToken
     });
+
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Internal Server Error');
